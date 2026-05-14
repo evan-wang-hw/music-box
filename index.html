@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RESONANCE — The Music Box</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:            #04040b;
+      --surface:       rgba(255,255,255,0.045);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border:        rgba(255,255,255,0.08);
+      --border-hover:  rgba(255,255,255,0.16);
+      --gold:          #c9a87a;
+      --gold-dim:      rgba(201,168,122,0.18);
+      --purple:        #7b5fcc;
+      --purple-dim:    rgba(123,95,204,0.15);
+      --blue-dim:      rgba(61,107,180,0.12);
+      --text:          #f0eee8;
+      --text-muted:    rgba(240,238,232,0.45);
+      --radius:        18px;
+      --blur:          22px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9000;
+    }
+
+    /* ─── LOADING ──────────────────────────────────────────────────────────── */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      transition: opacity 1s ease, visibility 1s ease;
+    }
+    #loader.out { opacity: 0; visibility: hidden; }
+    .loader-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 300;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .loader-track {
+      width: 220px; height: 1px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .loader-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--purple), var(--gold));
+      border-radius: 1px;
+      transition: width 0.25s ease;
+      box-shadow: 0 0 12px rgba(201,168,122,0.6);
+    }
+    .loader-label {
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* ─── NAV ──────────────────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(920px, calc(100% - 32px));
+      height: 52px;
+      background: rgba(4,4,11,0.55);
+      backdrop-filter: blur(var(--blur)) saturate(160%);
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 22px;
+      z-index: 800;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset, 0 8px 40px rgba(0,0,0,0.5), 0 0 60px rgba(123,95,204,0.08);
+    }
+    .nav-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 17px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 22px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      transition: color 0.25s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-btn {
+      padding: 7px 18px;
+      background: var(--gold-dim);
+      border: 1px solid rgba(201,168,122,0.28);
+      color: var(--gold);
+      border-radius: 100px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.07em;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .nav-btn:hover {
+      background: rgba(201,168,122,0.28);
+      box-shadow: 0 0 24px rgba(201,168,122,0.2);
+    }
+
+    /* ─── HERO ─────────────────────────────────────────────────────────────── */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-orb {
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(ellipse, rgba(123,95,204,0.18) 0%, rgba(61,107,180,0.08) 40%, transparent 70%);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: breathe 6s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.8; }
+      50%      { transform: translate(-50%,-50%) scale(1.08); opacity: 1; }
+    }
+    .hero-eyebrow {
+      font-size: 10.5px;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 22px;
+      position: relative;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(56px, 9vw, 108px);
+      font-weight: 300;
+      line-height: 0.95;
+      text-align: center;
+      letter-spacing: -0.02em;
+      position: relative;
+    }
+    .hero-title em { font-style: italic; color: rgba(240,238,232,0.5); display: block; }
+    .hero-sub {
+      margin-top: 28px;
+      font-size: 14px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      text-align: center;
+      max-width: 360px;
+      line-height: 1.9;
+      position: relative;
+    }
+    .scroll-cue {
+      position: absolute;
+      bottom: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      animation: nudge 2.4s ease-in-out infinite;
+    }
+    .scroll-cue span { width: 1px; height: 44px; background: linear-gradient(to bottom, var(--text-muted), transparent); display: block; }
+    @keyframes nudge { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+    /* ─── SCROLL ANIMATION ─────────────────────────────────────────────────── */
+    #scroll-zone { position: relative; height: 500vh; }
+    .sticky-stage {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .stage-aura {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(123,95,204,0.22) 0%, rgba(61,107,180,0.08) 45%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(201,168,122,0.06) 0%, transparent 60%);
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .canvas-wrap {
+      position: relative; z-index: 2;
+      width: min(920px, 92vw);
+      aspect-ratio: 16/9;
+      mask-image: radial-gradient(ellipse 82% 78% at 50% 50%, #000 25%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 82% 78% at 50% 50%, #000 25%, transparent 100%);
+    }
+    #stage-canvas { width: 100%; height: 100%; display: block; }
+    .copy-panel {
+      position: absolute; z-index: 3;
+      width: 210px;
+      opacity: 0;
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .copy-panel.left  { left: clamp(16px, 4vw, 64px); transform: translateX(-16px); }
+    .copy-panel.right { right: clamp(16px, 4vw, 64px); transform: translateX(16px); }
+    .copy-panel.show  { opacity: 1; transform: translateX(0) !important; }
+    .cp-eyebrow { font-size: 9.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 11px; }
+    .cp-head { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; line-height: 1.25; margin-bottom: 12px; }
+    .cp-body { font-size: 12.5px; color: var(--text-muted); line-height: 1.85; }
+
+    .scroll-progress-rail {
+      position: fixed; left: 26px; top: 50%;
+      transform: translateY(-50%);
+      width: 2px; height: 100px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 2px; z-index: 700;
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .scroll-progress-rail.visible { opacity: 1; }
+    .scroll-progress-fill {
+      width: 100%; height: 0%;
+      background: var(--gold);
+      border-radius: 2px;
+      box-shadow: 0 0 10px rgba(201,168,122,0.55);
+      transition: height 0.08s linear;
+    }
+    .scroll-frame-num {
+      position: absolute; bottom: -22px;
+      left: 50%; transform: translateX(-50%);
+      font-size: 9px; letter-spacing: 0.15em;
+      color: var(--text-muted); white-space: nowrap;
+    }
+
+    /* ─── SECTION SHELL (shared) ────────────────────────────────────────────── */
+    .section-wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 130px 40px;
+    }
+    .sec-header { text-align: center; margin-bottom: 72px; }
+    .sec-eyebrow {
+      font-size: 10px; letter-spacing: 0.35em;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 16px;
+    }
+    .sec-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 5vw, 58px);
+      font-weight: 300; line-height: 1.18;
+    }
+    .sec-title em { font-style: italic; color: var(--text-muted); }
+    .sec-sub {
+      margin-top: 16px; font-size: 14px;
+      color: var(--text-muted); line-height: 1.8;
+      max-width: 480px; margin-left: auto; margin-right: auto;
+    }
+
+    /* Section separator */
+    .sep {
+      width: 1px; height: 80px;
+      background: linear-gradient(to bottom, transparent, var(--border), transparent);
+      margin: 0 auto;
+    }
+
+    /* ─── FEATURES GRID ─────────────────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 14px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 30px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      position: relative;
+      overflow: hidden;
+      transition: background 0.35s, border-color 0.35s, transform 0.4s cubic-bezier(.16,1,.3,1), box-shadow 0.4s;
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.12) 50%, transparent 90%);
+    }
+    .card::after {
+      content: '';
+      position: absolute; inset: 0; border-radius: inherit;
+      background: radial-gradient(160px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.04), transparent 100%);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .card:hover::after { opacity: 1; }
+    .card:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06) inset, 0 0 50px rgba(123,95,204,0.09);
+    }
+    .card-wide  { grid-column: span 2; }
+    .card-tall  { grid-row: span 2; display: flex; flex-direction: column; }
+    .card-glow  { background: var(--purple-dim); border-color: rgba(123,95,204,0.22); }
+    .card-glow:hover { box-shadow: 0 24px 64px rgba(0,0,0,0.45), 0 0 60px rgba(123,95,204,0.18); }
+    .card-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: var(--gold-dim); border: 1px solid rgba(201,168,122,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; margin-bottom: 20px; flex-shrink: 0;
+    }
+    .card-title { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 400; line-height: 1.3; margin-bottom: 10px; }
+    .card-body { font-size: 13px; color: var(--text-muted); line-height: 1.82; }
+    .card-stat { font-family: 'Cormorant Garamond', serif; font-size: 54px; font-weight: 300; line-height: 1; color: var(--gold); margin-top: 26px; }
+    .card-stat sup { font-size: 22px; vertical-align: super; }
+    .card-stat-sub { font-size: 11px; letter-spacing: 0.15em; color: var(--text-muted); text-transform: uppercase; margin-top: 5px; }
+    .card-tall .spacer { flex: 1; }
+
+    /* ─── ABOUT ─────────────────────────────────────────────────────────────── */
+    .about-bg {
+      background: linear-gradient(180deg, transparent, rgba(123,95,204,0.04) 50%, transparent);
+    }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: start;
+    }
+    .about-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 10.5px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 26px;
+    }
+    .about-tag::before { content: ''; width: 28px; height: 1px; background: var(--gold); }
+    .about-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(38px, 5vw, 58px);
+      font-weight: 300;
+      line-height: 1.15;
+      margin-bottom: 28px;
+    }
+    .about-lead {
+      font-size: 15px;
+      line-height: 1.88;
+      color: rgba(240,238,232,0.65);
+      margin-bottom: 18px;
+    }
+    .about-body {
+      font-size: 13.5px;
+      line-height: 1.9;
+      color: var(--text-muted);
+    }
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      margin-top: 48px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+    }
+    .about-stat {
+      padding-right: 24px;
+      border-right: 1px solid var(--border);
+    }
+    .about-stat:last-child { padding-right: 0; padding-left: 24px; border-right: none; }
+    .about-stat:nth-child(2) { padding: 0 24px; }
+    .about-stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 42px; font-weight: 300;
+      color: var(--gold); line-height: 1;
+    }
+    .about-stat-label {
+      font-size: 11px; letter-spacing: 0.12em;
+      color: var(--text-muted); margin-top: 6px;
+      text-transform: uppercase;
+    }
+    /* Timeline panel */
+    .timeline-panel {
+      background: var(--purple-dim);
+      border: 1px solid rgba(123,95,204,0.2);
+      border-radius: 22px;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .timeline-panel::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 10%, rgba(123,95,204,0.5) 50%, transparent 90%);
+    }
+    .timeline-label {
+      font-size: 10px; letter-spacing: 0.3em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 28px;
+    }
+    .tl-item {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      gap: 18px;
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .tl-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .tl-item:first-child { padding-top: 0; }
+    .tl-year {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px; font-weight: 300;
+      color: var(--gold); line-height: 1.4;
+      padding-top: 2px;
+    }
+    .tl-title { font-size: 13.5px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+    .tl-desc { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+
+    /* Artisan quote */
+    .artisan-quote {
+      margin-top: 24px;
+      padding: 24px;
+      background: var(--gold-dim);
+      border: 1px solid rgba(201,168,122,0.18);
+      border-radius: 14px;
+      position: relative;
+    }
+    .artisan-quote::before {
+      content: '\201C';
+      position: absolute; top: 14px; left: 20px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 48px; color: var(--gold);
+      opacity: 0.4; line-height: 1;
+    }
+    .artisan-quote p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px; font-weight: 300; font-style: italic;
+      line-height: 1.7; color: rgba(240,238,232,0.8);
+      padding-left: 16px;
+    }
+    .artisan-cite {
+      margin-top: 14px;
+      font-size: 11px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--gold);
+      padding-left: 16px;
+    }
+
+    /* ─── PRODUCTS ──────────────────────────────────────────────────────────── */
+    .products-bg { background: var(--bg); }
+    .product-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .pc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: all 0.4s cubic-bezier(.16,1,.3,1);
+      position: relative;
+    }
+    .pc::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.1) 50%, transparent 90%);
+    }
+    .pc:hover {
+      transform: translateY(-8px);
+      border-color: var(--border-hover);
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 60px rgba(123,95,204,0.1);
+    }
+    .pc.featured {
+      background: linear-gradient(160deg, rgba(123,95,204,0.12), rgba(61,107,180,0.08));
+      border-color: rgba(123,95,204,0.3);
+    }
+    .pc.featured::before {
+      background: linear-gradient(90deg, transparent 5%, rgba(123,95,204,0.45) 50%, transparent 95%);
+    }
+    .pc.featured:hover { box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 80px rgba(123,95,204,0.2); }
+    .pc-badge {
+      position: absolute; top: 16px; right: 16px;
+      padding: 4px 12px;
+      background: var(--gold-dim);
+      border: 1px solid rgba(201,168,122,0.25);
+      border-radius: 100px;
+      font-size: 10px; letter-spacing: 0.15em;
+      color: var(--gold); text-transform: uppercase;
+    }
+    .pc-badge.featured-badge {
+      background: linear-gradient(90deg, rgba(123,95,204,0.3), rgba(201,168,122,0.2));
+      border-color: rgba(201,168,122,0.3);
+    }
+    .pc-head {
+      padding: 32px 28px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .pc-model { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .pc-name { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; line-height: 1.05; }
+    .pc-tagline { font-size: 13px; color: var(--text-muted); margin-top: 9px; line-height: 1.65; }
+    .pc-body { padding: 24px 28px; flex: 1; display: flex; flex-direction: column; }
+    .pc-features {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 28px; flex: 1;
+    }
+    .pc-features li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--text-muted);
+    }
+    .pc-features li::before { content: '◦'; color: var(--gold); font-size: 16px; flex-shrink: 0; }
+    .pc-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px; font-weight: 300;
+      color: var(--text); margin-bottom: 14px;
+    }
+    .pc-price span { font-size: 14px; color: var(--text-muted); font-family: 'Space Grotesk', sans-serif; }
+    .pc-cta {
+      width: 100%; padding: 12px;
+      border-radius: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; letter-spacing: 0.06em;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .pc-cta-ghost {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .pc-cta-ghost:hover { background: var(--surface-hover); border-color: var(--border-hover); }
+    .pc-cta-fill {
+      background: var(--gold);
+      border: none; color: #04040b; font-weight: 500;
+    }
+    .pc-cta-fill:hover { background: #d9bb8c; box-shadow: 0 0 28px rgba(201,168,122,0.3); }
+    .pc-cta-outline {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-muted);
+    }
+    .pc-cta-outline:hover { border-color: rgba(255,255,255,0.25); color: var(--text); }
+
+    /* ─── PRICING ───────────────────────────────────────────────────────────── */
+    .pricing-bg {
+      background: linear-gradient(180deg, transparent, rgba(201,168,122,0.03) 50%, transparent);
+    }
+    .pricing-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .price-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(.16,1,.3,1);
+    }
+    .price-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.1) 50%, transparent 90%);
+    }
+    .price-card:hover { border-color: var(--border-hover); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    .price-card.popular {
+      background: linear-gradient(160deg, rgba(123,95,204,0.14), rgba(61,107,180,0.09));
+      border-color: rgba(123,95,204,0.32);
+      transform: translateY(-10px);
+    }
+    .price-card.popular::before { background: linear-gradient(90deg, transparent 5%, rgba(123,95,204,0.45) 50%, transparent 95%); }
+    .price-card.popular:hover { transform: translateY(-14px); box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 60px rgba(123,95,204,0.2); }
+    .popular-chip {
+      position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+      padding: 5px 16px;
+      background: linear-gradient(90deg, var(--purple), #9d7ce0);
+      border-radius: 0 0 10px 10px;
+      font-size: 10px; letter-spacing: 0.15em;
+      text-transform: uppercase; color: #fff; white-space: nowrap;
+    }
+    .price-tier { font-size: 10.5px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 20px; }
+    .price-amount {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 50px; font-weight: 300; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .price-currency { font-size: 22px; color: var(--gold); vertical-align: super; }
+    .price-note { font-size: 12.5px; color: var(--text-muted); margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .price-desc { font-size: 13px; color: var(--text-muted); line-height: 1.8; margin-bottom: 26px; }
+    .price-list {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 11px;
+      margin-bottom: 32px;
+    }
+    .price-list li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 13px; color: var(--text-muted); line-height: 1.5;
+    }
+    .price-list li .ck { color: var(--gold); flex-shrink: 0; margin-top: 1px; font-size: 12px; }
+    .price-list li.dim .ck { color: rgba(255,255,255,0.18); }
+    .price-list li.dim { color: rgba(240,238,232,0.22); }
+    .price-btn {
+      width: 100%; padding: 13px;
+      border-radius: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; letter-spacing: 0.06em;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .price-btn-ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+    .price-btn-ghost:hover { background: var(--surface-hover); border-color: var(--border-hover); }
+    .price-btn-fill { background: var(--gold); border: none; color: #04040b; font-weight: 500; }
+    .price-btn-fill:hover { background: #d9bb8c; box-shadow: 0 0 28px rgba(201,168,122,0.3); }
+    .price-btn-outline { background: transparent; border: 1px solid rgba(123,95,204,0.4); color: var(--text-muted); }
+    .price-btn-outline:hover { border-color: rgba(123,95,204,0.7); color: var(--text); }
+    .pricing-note {
+      text-align: center; margin-top: 40px;
+      font-size: 13px; color: var(--text-muted); line-height: 1.8;
+    }
+    .pricing-note a { color: var(--gold); text-decoration: none; border-bottom: 1px solid rgba(201,168,122,0.3); padding-bottom: 1px; }
+
+    /* ─── SIDE PANEL ────────────────────────────────────────────────────────── */
+    .side-panel {
+      position: fixed; right: 20px; top: 50%;
+      transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 9px;
+      z-index: 700;
+    }
+    .side-btn {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: rgba(4,4,11,0.6); border: 1px solid var(--border);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 15px; color: var(--text-muted);
+      transition: all 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.3); position: relative;
+    }
+    .side-btn::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      border-radius: 12px 12px 0 0;
+    }
+    .side-btn:hover { background: rgba(255,255,255,0.07); border-color: var(--border-hover); color: var(--text); box-shadow: 0 0 24px rgba(123,95,204,0.2), 0 4px 20px rgba(0,0,0,0.4); }
+    .side-btn.active { background: var(--gold-dim); border-color: rgba(201,168,122,0.32); color: var(--gold); box-shadow: 0 0 20px rgba(201,168,122,0.22), 0 4px 20px rgba(0,0,0,0.4); }
+
+    /* ─── CTA ───────────────────────────────────────────────────────────────── */
+    .cta {
+      padding: 160px 40px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-aura {
+      position: absolute; width: 900px; height: 500px;
+      background: radial-gradient(ellipse, rgba(123,95,204,0.13) 0%, transparent 70%);
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+      pointer-events: none;
+    }
+    .cta-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(42px, 6.5vw, 78px); font-weight: 300; line-height: 1.12; margin-bottom: 36px; position: relative; }
+    .cta-title em { font-style: italic; color: var(--text-muted); }
+    .cta-sub { font-size: 14px; color: var(--text-muted); line-height: 1.8; max-width: 400px; margin: 0 auto 36px; position: relative; }
+    .cta-actions { display: flex; gap: 14px; justify-content: center; position: relative; }
+    .btn-fill {
+      padding: 13px 34px; background: var(--gold); color: #04040b;
+      border: none; border-radius: 100px;
+      font-family: 'Space Grotesk', sans-serif; font-size: 13.5px; font-weight: 500;
+      letter-spacing: 0.06em; cursor: pointer; transition: all 0.3s;
+    }
+    .btn-fill:hover { background: #d9bb8c; box-shadow: 0 0 36px rgba(201,168,122,0.38); transform: translateY(-2px); }
+    .btn-ghost {
+      padding: 13px 34px; background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 100px;
+      font-family: 'Space Grotesk', sans-serif; font-size: 13.5px;
+      letter-spacing: 0.06em; cursor: pointer; backdrop-filter: blur(12px); transition: all 0.3s;
+    }
+    .btn-ghost:hover { background: var(--surface-hover); border-color: var(--border-hover); transform: translateY(-2px); }
+
+    /* ─── FOOTER ────────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 60px 60px 36px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+    .footer-brand-col {}
+    .footer-brand {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px; font-weight: 400;
+      letter-spacing: 0.2em; color: var(--text);
+      display: block; margin-bottom: 14px;
+    }
+    .footer-brand-desc { font-size: 13px; color: var(--text-muted); line-height: 1.85; max-width: 260px; }
+    .footer-col-title {
+      font-size: 10.5px; letter-spacing: 0.28em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 20px;
+    }
+    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 11px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 13px; transition: color 0.25s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-bottom {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--text-muted); letter-spacing: 0.05em;
+    }
+
+    /* ─── REVEAL ────────────────────────────────────────────────────────────── */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.8s ease, transform 0.8s ease; }
+    .reveal.in-view { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- ── LOADER ──────────────────────────────────────────────────────────────── -->
+<div id="loader">
+  <div class="loader-brand">Resonance</div>
+  <div class="loader-track"><div class="loader-fill" id="loader-fill"></div></div>
+  <div class="loader-label" id="loader-label">Preparing your experience</div>
+</div>
+
+<!-- ── NAV ────────────────────────────────────────────────────────────────── -->
+<nav>
+  <a class="nav-brand" href="#">Resonance</a>
+  <ul class="nav-links">
+    <li><a href="#about">Our Story</a></li>
+    <li><a href="#craft">Craft</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <button class="nav-btn">Acquire</button>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-orb"></div>
+  <div class="hero-eyebrow">A New Chapter in Mechanical Sound</div>
+  <h1 class="hero-title">The Art of<br><em>Resonance</em></h1>
+  <p class="hero-sub">Seventy-two hand-tuned pins.<br>Sterling silver. Aged walnut.<br>One extraordinary voice.</p>
+  <div class="scroll-cue">Scroll to Discover<span></span></div>
+</section>
+
+<!-- ── SCROLL ANIMATION ───────────────────────────────────────────────────── -->
+<section id="scroll-zone">
+  <div class="sticky-stage">
+    <div class="stage-aura" id="stage-aura"></div>
+    <div class="copy-panel left" id="cp-l1">
+      <div class="cp-eyebrow">Mechanism</div>
+      <div class="cp-head">72 Precisely<br>Tuned Pins</div>
+      <div class="cp-body">Each pin is individually calibrated, a process taking four hours per instrument — yielding perfect resonance on every note.</div>
+    </div>
+    <div class="copy-panel right" id="cp-r1">
+      <div class="cp-eyebrow">Material</div>
+      <div class="cp-head">Sterling<br>Silver Comb</div>
+      <div class="cp-body">Our proprietary alloy sustains tones 40% longer than brass, with a warmth that deepens over decades of use.</div>
+    </div>
+    <div class="copy-panel left" id="cp-l2">
+      <div class="cp-eyebrow">Craftsmanship</div>
+      <div class="cp-head">200 Hours<br>of Labour</div>
+      <div class="cp-body">From raw billets to finished instrument — every box is the accumulated care of a single master craftsperson's hands.</div>
+    </div>
+    <div class="copy-panel right" id="cp-r2">
+      <div class="cp-eyebrow">Experience</div>
+      <div class="cp-head">Music That<br>Moves Time</div>
+      <div class="cp-body">Wind the key. Feel the gears align. Let the melody carry you somewhere only you have been before.</div>
+    </div>
+    <div class="canvas-wrap"><canvas id="stage-canvas" width="1280" height="720"></canvas></div>
+  </div>
+</section>
+<div class="scroll-progress-rail" id="prog-rail">
+  <div class="scroll-progress-fill" id="prog-fill"></div>
+  <div class="scroll-frame-num" id="prog-num">000</div>
+</div>
+
+<!-- ── FEATURES ───────────────────────────────────────────────────────────── -->
+<section id="craft">
+  <div class="section-wrap">
+    <div class="sec-header reveal">
+      <div class="sec-eyebrow">Engineering Excellence</div>
+      <h2 class="sec-title">Where Mechanics<br>Meet <em>Poetry</em></h2>
+      <p class="sec-sub">Every component is designed with obsessive precision. Not because it must be — but because it should be.</p>
+    </div>
+    <div class="grid">
+      <div class="card card-wide card-glow reveal">
+        <div class="card-icon">✦</div>
+        <div class="card-title">The Sterling Comb</div>
+        <div class="card-body">Machined from a single ingot of 92.5% pure silver, our comb vibrates with extraordinary clarity. Each tooth is individually tuned to ±0.01 Hz of its target frequency — a level of precision previously unachievable in any mechanical instrument.</div>
+        <div class="card-stat">0.01<sup>Hz</sup></div>
+        <div class="card-stat-sub">Tuning Precision</div>
+      </div>
+      <div class="card card-tall reveal" style="transition-delay:0.1s">
+        <div class="card-icon">◈</div>
+        <div class="card-title">40-Year<br>Aged Walnut</div>
+        <div class="card-body">The body is carved from black walnut seasoned for four decades. Its cellular structure amplifies mid-range frequencies with warmth no synthetic material can replicate. No two boxes sound exactly alike.</div>
+        <div class="spacer"></div>
+        <div class="card-stat">40<sup>yrs</sup></div>
+        <div class="card-stat-sub">Wood Age</div>
+      </div>
+      <div class="card reveal" style="transition-delay:0.15s">
+        <div class="card-icon">◉</div>
+        <div class="card-title">Endless Repertoire</div>
+        <div class="card-body">Interchangeable cylinders let you explore 48 curated compositions — from Satie to Sakamoto. Each cylinder hand-punched.</div>
+      </div>
+      <div class="card reveal" style="transition-delay:0.2s">
+        <div class="card-icon">⬡</div>
+        <div class="card-title">Heirloom Guarantee</div>
+        <div class="card-body">Every mechanism carries a 100-year service guarantee. This is not a purchase — it is a legacy passed between generations.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ── ABOUT ──────────────────────────────────────────────────────────────── -->
+<section id="about" class="about-bg">
+  <div class="section-wrap">
+    <div class="about-grid">
+
+      <!-- Left: narrative -->
+      <div class="reveal">
+        <div class="about-tag">Our Story</div>
+        <h2 class="about-title">A Century of<br>Quiet Devotion</h2>
+        <p class="about-lead">In 1924, master horologist Kenji Mori opened a small workshop in the Higashiyama district of Kyoto. He believed that sound could carry memory — that a single melody, wound and released by hand, could outlive its maker.</p>
+        <p class="about-body">A hundred years later, we carry that belief unchanged. Every music box we build begins not with metal or wood, but with a question: whose hands will hold this, and whose ears will close with its sound for the last time? That question guides every cut, every calibration, every lacquered finish.</p>
+        <p class="about-body" style="margin-top:14px">We do not scale. We do not automate. We make 48 instruments per year — one per week — and we sign every one.</p>
+        <div class="about-stats">
+          <div class="about-stat">
+            <div class="about-stat-num">1924</div>
+            <div class="about-stat-label">Founded</div>
+          </div>
+          <div class="about-stat">
+            <div class="about-stat-num">48</div>
+            <div class="about-stat-label">Per Year</div>
+          </div>
+          <div class="about-stat">
+            <div class="about-stat-num">100<span style="font-size:20px">yr</span></div>
+            <div class="about-stat-label">Guarantee</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: timeline + quote -->
+      <div class="reveal" style="transition-delay:0.12s">
+        <div class="timeline-panel">
+          <div class="timeline-label">A Hundred Years of Firsts</div>
+          <div class="tl-item">
+            <div class="tl-year">1924</div>
+            <div>
+              <div class="tl-title">The Workshop Founded</div>
+              <div class="tl-desc">Kenji Mori opens a twelve-tatami studio in Higashiyama, Kyoto, crafting his first music box from cypress and brass.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">1962</div>
+            <div>
+              <div class="tl-title">The Silver Comb</div>
+              <div class="tl-desc">Third-generation artisan Haruto Mori introduces the world's first sterling silver comb mechanism, doubling tonal sustain.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">1998</div>
+            <div>
+              <div class="tl-title">Heirloom Certification</div>
+              <div class="tl-desc">We establish the 100-year service guarantee — a promise that every instrument we ship can be fully restored for a century.</div>
+            </div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-year">2024</div>
+            <div>
+              <div class="tl-title">Centennial Collection</div>
+              <div class="tl-desc">To mark a hundred years, we unveil twelve instruments — one for each month — each paired with an original composition.</div>
+            </div>
+          </div>
+        </div>
+        <div class="artisan-quote">
+          <p>A music box does not play music. It releases it — one small miracle at a time.</p>
+          <div class="artisan-cite">— Haruto Mori, Third-generation Master</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ── PRODUCTS ────────────────────────────────────────────────────────────── -->
+<section id="products" class="products-bg">
+  <div class="section-wrap">
+    <div class="sec-header reveal">
+      <div class="sec-eyebrow">The Collection</div>
+      <h2 class="sec-title">Three Instruments,<br><em>One Philosophy</em></h2>
+      <p class="sec-sub">Each model is conceived for a different relationship with sound. Choose the instrument that matches the depth of your listening.</p>
+    </div>
+
+    <div class="product-cards">
+
+      <!-- Aria -->
+      <div class="pc reveal">
+        <div class="pc-head">
+          <div class="pc-model">Model I</div>
+          <div class="pc-name">Aria</div>
+          <div class="pc-tagline">The pure form. Unadorned, essential — the sound distilled to its simplest clarity.</div>
+        </div>
+        <div class="pc-body">
+          <ul class="pc-features">
+            <li>Brass mechanism, 36 pins</li>
+            <li>Cherrywood resonance chamber</li>
+            <li>12 standard compositions</li>
+            <li>Hand-lacquered finish</li>
+            <li>Certificate of authenticity</li>
+          </ul>
+          <div class="pc-price">¥480,000 <span>/ instrument</span></div>
+          <button class="pc-cta pc-cta-ghost">Explore Aria</button>
+        </div>
+      </div>
+
+      <!-- Nocturne (featured) -->
+      <div class="pc featured reveal" style="transition-delay:0.1s">
+        <div class="pc-badge featured-badge">Signature</div>
+        <div class="pc-head">
+          <div class="pc-model">Model II</div>
+          <div class="pc-name">Nocturne</div>
+          <div class="pc-tagline">The instrument we are most known for. Sterling silver, aged walnut, 72 pins of pure intention.</div>
+        </div>
+        <div class="pc-body">
+          <ul class="pc-features">
+            <li>Sterling silver comb, 72 pins</li>
+            <li>40-year aged black walnut</li>
+            <li>24 curated compositions</li>
+            <li>Interchangeable cylinder system</li>
+            <li>100-year heirloom guarantee</li>
+            <li>Individually signed & numbered</li>
+          </ul>
+          <div class="pc-price">¥1,280,000 <span>/ instrument</span></div>
+          <button class="pc-cta pc-cta-fill">Acquire Nocturne</button>
+        </div>
+      </div>
+
+      <!-- Lumière -->
+      <div class="pc reveal" style="transition-delay:0.2s">
+        <div class="pc-badge">Limited</div>
+        <div class="pc-head">
+          <div class="pc-model">Model III</div>
+          <div class="pc-name">Lumière</div>
+          <div class="pc-tagline">A commission. Your melody, your materials, your story — realised over eighteen months of dedicated craft.</div>
+        </div>
+        <div class="pc-body">
+          <ul class="pc-features">
+            <li>Full bespoke specification</li>
+            <li>Custom composition composed for you</li>
+            <li>Choice of silver, gold or enamel inlay</li>
+            <li>Dedicated artisan correspondence</li>
+            <li>Lifetime maintenance included</li>
+          </ul>
+          <div class="pc-price" style="color:var(--gold)">Upon request</div>
+          <button class="pc-cta pc-cta-outline">Begin a Commission</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ── PRICING ─────────────────────────────────────────────────────────────── -->
+<section id="pricing" class="pricing-bg">
+  <div class="section-wrap">
+    <div class="sec-header reveal">
+      <div class="sec-eyebrow">Investment</div>
+      <h2 class="sec-title">Transparent Pricing,<br><em>No Compromises</em></h2>
+      <p class="sec-sub">Each price reflects years of accumulated mastery. We do not discount; we do not negotiate. We simply build the best instrument we know how to build.</p>
+    </div>
+
+    <div class="pricing-cards">
+
+      <!-- Classic -->
+      <div class="price-card reveal">
+        <div class="price-tier">Aria — Classic</div>
+        <div class="price-amount"><span class="price-currency">¥</span>480,000</div>
+        <div class="price-note">Single instrument · 4–6 weeks delivery</div>
+        <div class="price-desc">Our entry into the world of mechanical sound. Every detail is refined; nothing is compromised.</div>
+        <ul class="price-list">
+          <li><span class="ck">◆</span> Brass mechanism, 36-pin cylinder</li>
+          <li><span class="ck">◆</span> Cherrywood resonance chamber</li>
+          <li><span class="ck">◆</span> 12 standard compositions</li>
+          <li><span class="ck">◆</span> Hand-lacquered natural finish</li>
+          <li><span class="ck">◆</span> Certificate of authenticity</li>
+          <li class="dim"><span class="ck">◆</span> Interchangeable cylinders</li>
+          <li class="dim"><span class="ck">◆</span> Heirloom guarantee</li>
+        </ul>
+        <button class="price-btn price-btn-ghost">Order Aria</button>
+      </div>
+
+      <!-- Signature (popular) -->
+      <div class="price-card popular reveal" style="transition-delay:0.1s">
+        <div class="popular-chip">Most Chosen</div>
+        <div class="price-tier">Nocturne — Signature</div>
+        <div class="price-amount"><span class="price-currency">¥</span>1,280,000</div>
+        <div class="price-note">Single instrument · 8–12 weeks delivery</div>
+        <div class="price-desc">The instrument we are most known for. Played in recording studios, private collections, and concert halls across the world.</div>
+        <ul class="price-list">
+          <li><span class="ck">◆</span> Sterling silver comb, 72 pins</li>
+          <li><span class="ck">◆</span> 40-year aged black walnut body</li>
+          <li><span class="ck">◆</span> 24 curated compositions</li>
+          <li><span class="ck">◆</span> Interchangeable cylinder system</li>
+          <li><span class="ck">◆</span> 100-year heirloom guarantee</li>
+          <li><span class="ck">◆</span> Individually signed & numbered</li>
+          <li><span class="ck">◆</span> Silk-lined presentation case</li>
+        </ul>
+        <button class="price-btn price-btn-fill">Acquire Nocturne</button>
+      </div>
+
+      <!-- Bespoke -->
+      <div class="price-card reveal" style="transition-delay:0.2s">
+        <div class="price-tier">Lumière — Bespoke</div>
+        <div class="price-amount" style="font-size:32px; padding-top:9px">Upon<br>Request</div>
+        <div class="price-note">Commission · 12–18 months · 1 of 1</div>
+        <div class="price-desc">A conversation, not a transaction. Tell us your story — we will spend the next eighteen months turning it into sound.</div>
+        <ul class="price-list">
+          <li><span class="ck">◆</span> Fully bespoke specification</li>
+          <li><span class="ck">◆</span> Custom composition, written for you</li>
+          <li><span class="ck">◆</span> Gold, silver or enamel inlay</li>
+          <li><span class="ck">◆</span> Dedicated artisan correspondence</li>
+          <li><span class="ck">◆</span> Lifetime maintenance included</li>
+          <li><span class="ck">◆</span> Private unveiling in Kyoto</li>
+          <li><span class="ck">◆</span> All of the above, and more</li>
+        </ul>
+        <button class="price-btn price-btn-outline">Begin a Commission</button>
+      </div>
+
+    </div>
+
+    <p class="pricing-note reveal">
+      All instruments are made to order. <a href="#">International shipping available</a> with white-glove delivery service.<br>
+      Prices are inclusive of all service and registration. Taxes may apply based on country of residence.
+    </p>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ── CTA ────────────────────────────────────────────────────────────────── -->
+<section class="cta">
+  <div class="cta-aura"></div>
+  <h2 class="cta-title reveal">Own a Piece of<br><em>Living History</em></h2>
+  <p class="cta-sub reveal" style="transition-delay:0.08s">Forty-eight instruments. Forty-eight stories. One will be yours.</p>
+  <div class="cta-actions reveal" style="transition-delay:0.16s">
+    <button class="btn-fill">Request an Edition</button>
+    <button class="btn-ghost">Explore the Craft</button>
+  </div>
+</section>
+
+<!-- ── SIDE PANEL ─────────────────────────────────────────────────────────── -->
+<div class="side-panel">
+  <button class="side-btn active" title="Home">◎</button>
+  <button class="side-btn" title="About">⊙</button>
+  <button class="side-btn" title="Products">⬡</button>
+  <button class="side-btn" title="Pricing">◈</button>
+  <button class="side-btn" title="Contact">✉</button>
+</div>
+
+<!-- ── FOOTER ──────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand-col">
+      <span class="footer-brand">Resonance</span>
+      <p class="footer-brand-desc">Handcrafted music boxes built one at a time in Kyoto, Japan. Every instrument is a century in the making — and a century in the keeping.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigate</div>
+      <ul class="footer-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#about">Our Story</a></li>
+        <li><a href="#craft">Craft &amp; Engineering</a></li>
+        <li><a href="#products">The Collection</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Instruments</div>
+      <ul class="footer-links">
+        <li><a href="#">Aria — Classic</a></li>
+        <li><a href="#">Nocturne — Signature</a></li>
+        <li><a href="#">Lumière — Bespoke</a></li>
+        <li><a href="#">Cylinder Library</a></li>
+        <li><a href="#">Centennial Edition</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Atelier</div>
+      <ul class="footer-links">
+        <li><a href="#">Visit the Workshop</a></li>
+        <li><a href="#">Care &amp; Restoration</a></li>
+        <li><a href="#">Commission Process</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 Resonance Atelier, Kyoto — Est. 1924</div>
+    <div>48 instruments per year · Made entirely by hand</div>
+    <div>Privacy · Terms · Legal</div>
+  </div>
+</footer>
+
+<!-- ── SCRIPT ──────────────────────────────────────────────────────────────── -->
+<script>
+(function () {
+  'use strict';
+
+  const TOTAL  = 192;
+  const PADDED = n => String(n).padStart(4, '0');
+
+  const canvas     = document.getElementById('stage-canvas');
+  const ctx        = canvas.getContext('2d');
+  const loader     = document.getElementById('loader');
+  const loaderBar  = document.getElementById('loader-fill');
+  const loaderLbl  = document.getElementById('loader-label');
+  const aura       = document.getElementById('stage-aura');
+  const rail       = document.getElementById('prog-rail');
+  const progFill   = document.getElementById('prog-fill');
+  const progNum    = document.getElementById('prog-num');
+  const scrollZone = document.getElementById('scroll-zone');
+  const cpL1 = document.getElementById('cp-l1'), cpR1 = document.getElementById('cp-r1');
+  const cpL2 = document.getElementById('cp-l2'), cpR2 = document.getElementById('cp-r2');
+
+  /* ── preload ── */
+  const imgs = new Array(TOTAL);
+  let loaded = 0;
+
+  function onLoad() {
+    loaded++;
+    const pct = Math.round((loaded / TOTAL) * 100);
+    loaderBar.style.width = pct + '%';
+    loaderLbl.textContent = pct < 100 ? `Loading ${pct}%` : 'Ready';
+    if (loaded === 1) drawFrame(0);
+    if (loaded === TOTAL) setTimeout(() => loader.classList.add('out'), 300);
+  }
+
+  for (let i = 0; i < TOTAL; i++) {
+    imgs[i] = new Image();
+    imgs[i].onload = imgs[i].onerror = onLoad;
+    imgs[i].src = `frames/frame_${PADDED(i)}.jpg`;
+  }
+
+  /* ── draw ── */
+  let currentIdx = 0;
+  function drawFrame(idx) {
+    const img = imgs[idx];
+    if (!img || !img.complete || !img.naturalWidth) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    currentIdx = idx;
+  }
+
+  /* ── scroll mapping ── */
+  function scrollProg() {
+    const r = scrollZone.getBoundingClientRect();
+    const travel = scrollZone.offsetHeight - window.innerHeight;
+    return Math.max(0, Math.min(1, -r.top / travel));
+  }
+  function inZone() {
+    const r = scrollZone.getBoundingClientRect();
+    return r.top <= 0 && r.bottom >= window.innerHeight;
+  }
+
+  let rafPending = false;
+  function onScroll() { if (!rafPending) { rafPending = true; requestAnimationFrame(tick); } }
+
+  function tick() {
+    rafPending = false;
+    const prog = scrollProg();
+    const idx  = Math.min(TOTAL - 1, Math.floor(prog * TOTAL));
+    if (idx !== currentIdx) drawFrame(idx);
+    const iz = inZone();
+    rail.classList.toggle('visible', iz);
+    if (iz) { progFill.style.height = (prog * 100) + '%'; progNum.textContent = PADDED(idx); }
+    const p1 = prog < 0.5;
+    cpL1.classList.toggle('show', p1);
+    cpR1.classList.toggle('show', p1);
+    cpL2.classList.toggle('show', !p1 && prog < 1);
+    cpR2.classList.toggle('show', !p1 && prog < 1);
+    aura.style.opacity = String(0.6 + Math.sin(prog * Math.PI) * 0.4);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ── side panel ── */
+  const sideBtns = document.querySelectorAll('.side-btn');
+  const sections = ['', 'about', 'craft', 'products', 'pricing'];
+  sideBtns.forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      sideBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (sections[i]) document.getElementById(sections[i])?.scrollIntoView({ behavior: 'smooth' });
+      else window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  /* ── card cursor glow ── */
+  document.querySelectorAll('.card, .price-card, .pc').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width  * 100) + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100) + '%');
+    });
+  });
+
+  /* ── reveal ── */
+  new IntersectionObserver(
+    entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('in-view')),
+    { threshold: 0.12 }
+  ).observe.bind(new IntersectionObserver(
+    entries => entries.forEach(e => e.isIntersecting && e.target.classList.add('in-view')),
+    { threshold: 0.12 }
+  ));
+
+  const revObs = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); }),
+    { threshold: 0.12 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
+
+  /* ── hero orb parallax ── */
+  document.querySelector('.hero').addEventListener('mousemove', e => {
+    const cx = (e.clientX / window.innerWidth  - 0.5) * 30;
+    const cy = (e.clientY / window.innerHeight - 0.5) * 20;
+    document.querySelector('.hero-orb').style.transform =
+      `translate(calc(-50% + ${cx}px), calc(-50% + ${cy}px))`;
+  });
+
+  /* ── active nav on scroll ── */
+  const navSections = ['about','craft','products','pricing'].map(id => document.getElementById(id)).filter(Boolean);
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY + window.innerHeight / 2;
+    let active = -1;
+    navSections.forEach((sec, i) => {
+      if (sec.offsetTop <= scrollY) active = i;
+    });
+    navLinks.forEach((a, i) => a.style.color = i === active ? 'var(--text)' : '');
+  }, { passive: true });
+
+})();
+</script>
+</body>
+</html>

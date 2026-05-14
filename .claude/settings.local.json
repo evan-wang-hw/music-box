@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "PowerShell(python --version)",
+      "PowerShell(python -c \"import cv2; print\\('cv2 ok'\\)\" 2>&1)"
+    ]
+  }
+}
